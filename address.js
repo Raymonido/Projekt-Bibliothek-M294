@@ -12,8 +12,7 @@ async function getAllAdresses() {
 
 }
 
-
-getAllAdresses()
+getAllAdresses();
 
 function renderAdresses(address) {
     const row = document.getElementById('addressRow');
@@ -257,7 +256,5 @@ document.getElementById('searchBar').addEventListener('submit', function (e) {
     if (input.length > 0) {
         searchAddress(input);
     } else getAllAdresses();
-
-
 })
 
