@@ -81,11 +81,24 @@ function renderCustomers(customers) {
             document.getElementById('editCustomerForm').setAttribute('data-name', firstName + " " + lastName);
             document.getElementById('deleteButton').setAttribute('data-id', id);
             document.getElementById('deleteButton').setAttribute('data-name', firstName + " " + lastName);
+
+            const updateEmailInput = document.getElementById('updateEmail');
+            updateEmailInput.classList.remove('is-valid', 'is-invalid');
         });
     });
 }
 
+function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
+
 async function createCustomer(data) {
+    if (!validateEmail(data.email)) {
+        showBootstrapAlert("Bitte geben Sie eine gültige E-Mail-Adresse ein.", "danger");
+        throw new Error("Ungültige E-Mail-Adresse");
+    }
+
     const customerData = {
         firstName: data.firstName,
         lastName: data.lastName,
@@ -119,6 +132,10 @@ async function updateCustomer(data, id) {
     const updateData = {};
 
     if (data.email) {
+        if (!validateEmail(data.email)) {
+            showBootstrapAlert("Bitte geben Sie eine gültige E-Mail-Adresse ein.", "danger");
+            throw new Error("Ungültige E-Mail-Adresse");
+        }
         updateData.email = data.email;
     }
 
@@ -191,6 +208,44 @@ function showBootstrapAlert(message, type = 'warning') {
     }, 3000);
 }
 
+function addEmailValidation(inputId) {
+    const emailInput = document.getElementById(inputId);
+
+    if (emailInput) {
+
+        let feedbackElement = emailInput.nextElementSibling;
+        if (!feedbackElement || !feedbackElement.classList.contains('invalid-feedback')) {
+            feedbackElement = document.createElement('div');
+            feedbackElement.className = 'invalid-feedback';
+            feedbackElement.textContent = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+            emailInput.parentNode.insertBefore(feedbackElement, emailInput.nextSibling);
+        }
+
+
+        emailInput.addEventListener('input', function() {
+            const isValid = validateEmail(this.value);
+
+            if (isValid || this.value.trim() === '') {
+                this.classList.remove('is-invalid');
+                if (this.value.trim() !== '') {
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    addEmailValidation('email');
+    addEmailValidation('updateEmail');
+});
+
 document.getElementById('createForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -214,6 +269,13 @@ document.getElementById('createForm').addEventListener('submit', async function 
         return;
     }
 
+    const emailInput = document.getElementById('email');
+    if (!validateEmail(data.email)) {
+        emailInput.classList.add('is-invalid');
+        showBootstrapAlert("Bitte geben Sie eine gültige E-Mail-Adresse ein.", "danger");
+        return;
+    }
+
     try {
         await createCustomer(data);
 
@@ -230,6 +292,9 @@ document.getElementById('createForm').addEventListener('submit', async function 
         await getAllCustomers();
 
         form.reset();
+        form.querySelectorAll('.is-valid, .is-invalid').forEach(input => {
+            input.classList.remove('is-valid', 'is-invalid');
+        });
     } catch (error) {
         console.error("Fehler bei der Kundenerstellung:", error);
     }
@@ -249,6 +314,13 @@ document.getElementById('editCustomerForm').addEventListener('submit', async fun
         if (value.trim() !== '') {
             data[key] = value.trim();
         }
+    }
+
+    const emailInput = document.getElementById('updateEmail');
+    if (data.email && !validateEmail(data.email)) {
+        emailInput.classList.add('is-invalid');
+        showBootstrapAlert("Bitte geben Sie eine gültige E-Mail-Adresse ein.", "danger");
+        return;
     }
 
     try {

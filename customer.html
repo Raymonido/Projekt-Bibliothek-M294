@@ -87,11 +87,11 @@
                     <form id="createForm">
                         <div class="mb-3">
                             <label for="firstName" class="form-label fw-bold">Vorname:</label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Max" required>
+                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Max" maxlength="40" required>
                         </div>
                         <div class="mb-3">
                             <label for="lastName" class="form-label fw-bold">Nachname:</label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Mustermann" required>
+                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Mustermann" maxlength="40" required>
                         </div>
                         <div class="mb-3">
                             <label for="birthdate" class="form-label fw-bold">Geburtsdatum:</label>
@@ -99,7 +99,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label fw-bold">Email:</label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="max.mustermann@example.com" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="max.mustermann@example.com" maxlength="50" required>
                         </div>
                         <div class="mb-3">
                             <label for="address" class="form-label fw-bold">Strasse und Hausnummer:</label>
@@ -134,7 +134,7 @@
                     <form id="editCustomerForm">
                         <div class="mb-3">
                             <label for="updateEmail" class="form-label fw-bold">Email:</label>
-                            <input type="email" class="form-control" id="updateEmail" name="email" placeholder="neue@email.com">
+                            <input type="email" class="form-control" id="updateEmail" name="email" placeholder="neue@email.com" maxlength="50">
                         </div>
                         <div class="mb-3">
                             <label for="updateAddress" class="form-label fw-bold">Strasse und Hausnummer:</label>
