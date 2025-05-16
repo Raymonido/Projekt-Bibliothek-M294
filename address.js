@@ -168,7 +168,7 @@ document.getElementById('editForm').addEventListener('submit', async function (e
     }
 
     if (!allFieldsFilled) {
-        alert("Bitte fülle alle Felder aus.");
+        showBootstrapAlert("Bitte füllen Sie alle Felder aus.", "warning");
         return;
     }
 
