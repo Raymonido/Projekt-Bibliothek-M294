@@ -138,7 +138,7 @@ function showBootstrapAlert(message, type = 'warning') {
     }, 3000);
 }
 
-document.getElementById('editForm').addEventListener('submit', async function (e) {
+document.getElementById('createForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const form = e.target;
