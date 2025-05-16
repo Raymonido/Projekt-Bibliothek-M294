@@ -1,8 +1,15 @@
 async function getAllAdresses() {
     let endpoint = "http://localhost:8080/api/address/get/all"
-    const request = await fetch(endpoint, {method: "GET"});
-    let allAddresses = await request.json();
-    renderAdresses(allAddresses)
+    try {
+        const request = await fetch(endpoint, {method: "GET"});
+        let allAddresses = await request.json();
+        renderAdresses(allAddresses)
+    } catch (error) {
+        console.error("Fehler beim Laden der Adressen:", error);
+        showBootstrapAlert("Fehler beim Laden der Adressen", "danger");
+        throw error;
+    }
+
 }
 
 
@@ -18,8 +25,8 @@ function renderAdresses(address) {
 
         col.innerHTML = `
             <div class="card" style="width: 18rem;">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${address.address}</h5>
+                <div class="card-body d-flex flex-column shadow-sm">
+                    <h5 class="card-title"><b>${address.address}</b></h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">${address.city}</h6>
                     <p class="card-text">${address.zip}</p>
                     <div class="d-flex justify-content-end mt-auto">
@@ -60,25 +67,44 @@ function renderAdresses(address) {
 
 async function createAddress(data) {
     let endpoint = "http://localhost:8080/api/address/create";
-    const request = await fetch(endpoint, {method: "POST",  headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)});
-    return await request.json();
+    try {
+        const request = await fetch(endpoint, {method: "POST",  headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)});
+        return await request.json();
+    } catch (error) {
+        console.error("Fehler beim erstellen der Adresse:", error);
+        showBootstrapAlert("Fehler beim erstellen der Adresse", "danger");
+        throw error;
+    }
+
 }
 
 async function updateAddress(data, id) {
     let endpoint = `http://localhost:8080/api/address/update/${id}`;
-    const request = await fetch(endpoint, {method: "PATCH", headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)});
-    return await request.json();
+    try {
+        const request = await fetch(endpoint, {method: "PATCH", headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)});
+        return await request.json();
+    } catch (error) {
+        console.error("Fehler beim ändern der Adresse:", error);
+        showBootstrapAlert("Fehler beim ändern der Adresse", "danger");
+    }
+
 }
 
 async function deleteAddress(id) {
     const endpoint = `http://localhost:8080/api/address/delete/${id}`
-    await fetch(endpoint, {method: "DELETE"});
+    try {
+        return await fetch(endpoint, {method: "DELETE"});
+    } catch(error) {
+        console.error("Fehler beim löschen der Adresse:", error);
+        showBootstrapAlert("Fehler beim löschen der Adresse", "danger");
+    }
+
 }
 
 async function searchAddress(data) {
@@ -202,21 +228,25 @@ document.getElementById('deleteButton').addEventListener('click', async function
     let id = document.getElementById('deleteButton').getAttribute('data-id');
     let address = document.getElementById('deleteButton').getAttribute('data-address')
 
-    await deleteAddress(id);
+    let response = await deleteAddress(id);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
-    modal.hide();
+    if (response.status === 409) {
+        showBootstrapAlert("Die Adresse wird noch von einem Kunden verwendet und kann daher nicht gelöscht werden.", "warning", )
 
-    const toast = document.getElementById("toast")
-    const toastBody = document.getElementById('toastBody')
-    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
+    } else {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+        modal.hide();
 
-    toastBody.innerHTML = "Adresse (" + address + ") wurde erfolgreich gelöscht!"
+        const toast = document.getElementById("toast")
+        const toastBody = document.getElementById('toastBody')
+        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
 
-    await getAllAdresses();
+        toastBody.innerHTML = "Adresse (" + address + ") wurde erfolgreich gelöscht!"
 
-    toastBootstrap.show();
+        await getAllAdresses();
 
+        toastBootstrap.show();
+    }
 });
 
 document.getElementById('searchBar').addEventListener('submit', function (e) {

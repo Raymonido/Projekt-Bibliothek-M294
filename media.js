@@ -1,9 +1,16 @@
 async function getAllMedia() {
     let endpoint = "http://localhost:8080/api/media/get/all"
-    const request = await fetch(endpoint, {method: "GET"});
-    let allMedia = await request.json();
-    console.log(allMedia);
-    renderMedia(allMedia)
+    try {
+        const request = await fetch(endpoint, {method: "GET"});
+        let allMedia = await request.json();
+        console.log(allMedia);
+        renderMedia(allMedia)
+    } catch (error) {
+        console.error("Fehler beim Laden der Medien:", error);
+        showBootstrapAlert("Fehler beim Laden der Medien", "danger");
+        throw error;
+    }
+
 }
 
 
@@ -19,9 +26,16 @@ function renderMedia(media) {
         col.className = "col-md-3 my-3";
 
         col.innerHTML = `
-            <div class="card" style="width: 18rem; height: 11rem">
+            <div class="card shadow-sm" style="width: 18rem; height: 11rem">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${media.title}</h5>
+                    <div class="d-flex flex-row justify-content-between">
+                    <h5 class="card-title"><b>${media.title}</b></h5>
+                     <div class="shadow-lg media-top-fsk" ${media.fsk == null || media.fsk === "" ? 'style="display: none;"' : ''}>
+                        <p class="h4 mt-1" style="min-width: 40px">
+                        ${media.fsk ?? ""}
+                        </p>
+                    </div>
+                    </div>
                     <h6 class="card-subtitle mb-2 text-body-secondary">${media.author}</h6>
                     <div class="d-flex justify-content-between">
                     <p class="card-text"><i>${media.genre}</i></p>
@@ -39,11 +53,6 @@ function renderMedia(media) {
   <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
 </svg></a>
        <p class="card-text" ${media.isbn == null | media.isbn === "" ? 'style="display: none;"' : ''}>ISBN: ${media.isbn}</p>
-                    </div>
-                    <div class="media-card-fsk" ${media.fsk == null || media.fsk === "" ? 'style="display: none;"' : ''}>
-                        <p class="h4 m-0" >
-                        ${media.fsk ?? ""}
-                        </p>
                     </div>
                 </div>
             </div>
@@ -80,26 +89,47 @@ function renderMedia(media) {
 
 async function createMedia(data) {
     let endpoint = "http://localhost:8080/api/media/create";
-    const request = await fetch(endpoint, {method: "POST",  headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)});
-    return await request.json();
+    try {
+        const request = await fetch(endpoint, {method: "POST",  headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)});
+        return await request.json();
+    } catch (error) {
+        console.error("Fehler beim Erstellen eines Mediums: ", error);
+        showBootstrapAlert("Fehler beim Erstellen eines Mediums: ", error);
+        throw error;
+    }
+
 }
 
 async function updateMedia(data, id) {
-    let endpoint = `http://localhost:8080/api/media/update/${id}`;
-    const request = await fetch(endpoint, {
-        method: "PATCH",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    return await request.json();
+    const endpoint = `http://localhost:8080/api/media/update/${id}`;
+    try {
+        const request = await fetch(endpoint, {
+            method: "PATCH",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        return await request.json();
+    } catch (error) {
+        console.error("Fehler beim Ändern eines Mediums: ", error);
+        showBootstrapAlert("Fehler beim Ändern eines Mediums: ", error);
+        throw error;
+    }
+
 }
 
 async function deleteMedia(id) {
     const endpoint = `http://localhost:8080/api/media/delete/${id}`;
-    await fetch(endpoint, { method: "DELETE" });
+    try {
+        await fetch(endpoint, { method: "DELETE" });
+    } catch(error) {
+        console.error("Fehler beim Erstellen eines Mediums: ", error);
+        showBootstrapAlert("Fehler beim Erstellen eines Mediums: ", error);
+        throw error;
+    }
+
 }
 
 async function search(data) {

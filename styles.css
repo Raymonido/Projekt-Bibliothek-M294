@@ -17,6 +17,25 @@ html, body {
     border-bottom-right-radius: 1rem;
 }
 
-.media-card-fsk {
-    position: absolute; right: 5px; top: 5px; border-radius: 30px; border: black solid 1px; width: 40px; height: 40px; text-align: center; display: flex; justify-content: center; align-items: center
+.media-top-fsk {
+    border: solid black 1px;
+    border-radius: 30px;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.customer-card {
+    height: 100%;
+    position: relative;
+}
+.email-bar {
+    background-color: #e3f2fd;
+    padding: 8px;
+    text-align: center;
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    margin-top: auto;
 }
