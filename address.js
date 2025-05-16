@@ -18,11 +18,11 @@ function renderAdresses(address) {
 
         col.innerHTML = `
             <div class="card" style="width: 18rem;">
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${address.address}</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">${address.city}</h6>
                     <p class="card-text">${address.zip}</p>
-                    <div class="d-flex justify-content-end">
+                    <div class="d-flex justify-content-end mt-auto">
                      <a href="#" class="card-link edit-link" data-id="${address.id}" 
                            data-address="${address.address}" 
                            data-city="${address.city}" 

@@ -1,0 +1,23 @@
+{
+  "name": "projekt-bibliothek-m294",
+  "version": "1.0.0",
+  "main": "address.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raymonido/Projekt-Bibliothek-M294.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raymonido/Projekt-Bibliothek-M294/issues"
+  },
+  "homepage": "https://github.com/Raymonido/Projekt-Bibliothek-M294#readme",
+  "description": "",
+  "dependencies": {
+    "bootstrap": "^5.3.6"
+  }
+}

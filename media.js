@@ -14,16 +14,20 @@ function renderMedia(media) {
     row.innerHTML = "";
 
     media.forEach(media => {
+
         const col = document.createElement("div");
         col.className = "col-md-3 my-3";
 
         col.innerHTML = `
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
+            <div class="card" style="width: 18rem; height: 11rem">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">${media.title}</h5>
                     <h6 class="card-subtitle mb-2 text-body-secondary">${media.author}</h6>
-                    <p class="card-text">${media.genre}</p>
                     <div class="d-flex justify-content-between">
+                    <p class="card-text"><i>${media.genre}</i></p>
+                    <p class="card-text">${media.code}</p>
+                    </div>
+                    <div class="d-flex justify-content-between flex-row-reverse mt-auto">
                      <a href="#" class="card-link edit-link" data-id="${media.id}" 
                            data-title="${media.title}" 
                            data-author="${media.author}" 
@@ -34,7 +38,12 @@ function renderMedia(media) {
                            data-bs-toggle="modal" data-bs-target="#editMediaModal"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
   <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
 </svg></a>
-       <p class="card-text">${media.fsk}</p>
+       <p class="card-text" ${media.isbn == null | media.isbn === "" ? 'style="display: none;"' : ''}>ISBN: ${media.isbn}</p>
+                    </div>
+                    <div class="media-card-fsk" ${media.fsk == null || media.fsk === "" ? 'style="display: none;"' : ''}>
+                        <p class="h4 m-0" >
+                        ${media.fsk ?? ""}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -60,15 +69,14 @@ function renderMedia(media) {
 
             document.getElementById('editCustomerMediaLabel').innerHTML = title + " Bearbeiten";
 
-            document.getElementById('editAddressForm').setAttribute('data-id', id);
-            document.getElementById('editAddressForm').setAttribute('data-address', address);
+            document.getElementById('editMediaForm').setAttribute('data-id', id);
+            document.getElementById('editMediaForm').setAttribute('data-title', title);
             document.getElementById('deleteButton').setAttribute('data-id', id);
-            document.getElementById('deleteButton').setAttribute('data-address', address)
+            document.getElementById('deleteButton').setAttribute('data-title', title)
         });
     });
 
 }
-
 
 async function createMedia(data) {
     let endpoint = "http://localhost:8080/api/media/create";
@@ -79,46 +87,41 @@ async function createMedia(data) {
     return await request.json();
 }
 
-async function updateAddress(data, id) {
-    let endpoint = `http://localhost:8080/api/address/update/${id}`;
-    const request = await fetch(endpoint, {method: "PATCH", headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)});
+async function updateMedia(data, id) {
+    let endpoint = `http://localhost:8080/api/media/update/${id}`;
+    const request = await fetch(endpoint, {
+        method: "PATCH",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
     return await request.json();
 }
 
-async function deleteAddress(id) {
-    const endpoint = `http://localhost:8080/api/address/delete/${id}`
-    await fetch(endpoint, {method: "DELETE"});
+async function deleteMedia(id) {
+    const endpoint = `http://localhost:8080/api/media/delete/${id}`;
+    await fetch(endpoint, { method: "DELETE" });
 }
 
-async function searchAddress(data) {
+async function search(data) {
     const headers = { 'Content-Type': 'application/json' };
 
-    const addressResponse = await fetch(`http://localhost:8080/api/address/get/address/${encodeURIComponent(data)}`, { headers });
-    const addresses = await addressResponse.json();
+    const titleResponse = await fetch(`http://localhost:8080/api/media/get/title/${encodeURIComponent(data)}`, { headers });
+    const byTitle = await titleResponse.json();
+    console.log(byTitle)
 
-    if (addresses.length > 0) {
-        return renderAdresses(addresses);
+    if (byTitle.length > 0) {
+        return renderMedia(byTitle);
     }
 
-    const zipResponse = await fetch(`http://localhost:8080/api/address/get/zip/${encodeURIComponent(data)}`, { headers });
-    const zips = await zipResponse.json();
+    const authorResponse = await fetch(`http://localhost:8080/api/media/get/author/${encodeURIComponent(data)}`, { headers });
+    const byAuthor = await authorResponse.json();
 
-    if (zips.length > 0) {
-        return renderAdresses(zips);
+    if (byAuthor.length > 0) {
+        return renderMedia(byAuthor);
     }
 
 
-    const cityResponse = await fetch(`http://localhost:8080/api/address/get/city/${encodeURIComponent(data)}`, { headers });
-    const cities = await cityResponse.json();
-
-    if (cities.length > 0) {
-        return renderAdresses(cities);
-    }
-
-    showBootstrapAlert("Keine Suchergebnisse gefunden")
+    showBootstrapAlert("Keine Suchergebnisse gefunden");
 }
 
 function showBootstrapAlert(message, type = 'warning') {
@@ -145,25 +148,39 @@ document.getElementById('createForm').addEventListener('submit', async function 
     const formData = new FormData(form);
     const data = {};
 
+    let missingFields = [];
+
     for (const [key, value] of formData.entries()) {
-        data[key] = value.trim();
+        const trimmed = value.trim();
+
+        if (key === "title" || key === "author") {
+            if (!trimmed) {
+                missingFields.push(key);
+            }
+            data[key] = trimmed;
+        } else {
+            data[key] = trimmed || "";
+        }
     }
 
+    if (missingFields.length > 0) {
+        showBootstrapAlert("Bitte fülle folgende Pflichtfelder aus: " + missingFields.join(", "), "danger");
+        return;
+    }
 
-    await createMedia(data)
+    await createMedia(data);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('createMediaModal'));
     modal.hide();
 
-    const toast = document.getElementById("toast")
-    const toastBody = document.getElementById('toastBody')
+    const toast = document.getElementById("toast");
+    const toastBody = document.getElementById('toastBody');
     const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
 
-    toastBody.innerHTML = "Adresse (" + data.address + ") wurde erfolgreich erstellt!"
-
+    toastBody.innerHTML = "Medium (" + data.title + ") wurde erfolgreich erstellt!";
     toastBootstrap.show();
 
-    await getAllAdresses();
+    await getAllMedia();
 
     form.reset();
 });
@@ -174,8 +191,7 @@ document.getElementById('editMediaForm').addEventListener('submit', async functi
 
     const form = e.target;
     const id = form.getAttribute('data-id');
-    const address = form.getAttribute('data-address');
-    console.log(id)
+    const title = form.getAttribute('data-title');
     const formData = new FormData(form);
     const data = {};
     for (const [key, value] of formData.entries()) {
@@ -183,40 +199,39 @@ document.getElementById('editMediaForm').addEventListener('submit', async functi
             data[key] = value.trim();
         }
     }
-    console.log(data)
 
-    await updateAddress(data, id);
+   await updateMedia(data, id);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editMediaModal'));
     modal.hide();
 
     const toast = document.getElementById("toast")
     const toastBody = document.getElementById('toastBody')
     const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
 
-    toastBody.innerHTML = "Adresse (" + address + ") wurde erfolgreich geändert!"
+    toastBody.innerHTML = "Medium (" + title + ") wurde erfolgreich geändert!"
 
-    await getAllAdresses();
+    await getAllMedia();
 
     toastBootstrap.show();
 });
 
 document.getElementById('deleteButton').addEventListener('click', async function () {
     let id = document.getElementById('deleteButton').getAttribute('data-id');
-    let address = document.getElementById('deleteButton').getAttribute('data-address')
+    let title = document.getElementById('deleteButton').getAttribute('data-title')
 
-    await deleteAddress(id);
+    await deleteMedia(id);
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('editAddressModal'));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editMediaModal'));
     modal.hide();
 
     const toast = document.getElementById("toast")
     const toastBody = document.getElementById('toastBody')
     const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
 
-    toastBody.innerHTML = "Adresse (" + address + ") wurde erfolgreich gelöscht!"
+    toastBody.innerHTML = "Medium (" + title + ") wurde erfolgreich gelöscht!"
 
-    await getAllAdresses();
+    await getAllMedia();
 
     toastBootstrap.show();
 
@@ -228,8 +243,8 @@ document.getElementById('searchBar').addEventListener('submit', function (e) {
     let input = document.getElementById('search').value.trim();
 
     if (input.length > 0) {
-        searchAddress(input);
-    } else getAllAdresses();
+        search(input);
+    } else getAllMedia();
 
 
 })
